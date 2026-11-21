@@ -44,6 +44,7 @@ h1 span { color: #6550e7; margin-left: .04em; }
 .tile { perspective: 950px; min-width: 0; }
 .tile:hover, .tile:focus-within { z-index: 1; }
 .card {
+  --art-height: clamp(148px, 21vw, 248px);
   min-height: 100%;
   position: relative;
   border: 1px solid #deded9;
@@ -60,7 +61,7 @@ h1 span { color: #6550e7; margin-left: .04em; }
   overflow: hidden;
   display: grid;
   place-items: center;
-  height: clamp(148px, 21vw, 248px);
+  height: var(--art-height);
   background-color: var(--art-background, #eeecef);
   background-image: radial-gradient(#2222 1px, transparent 1px);
   background-size: 16px 16px;
@@ -94,12 +95,41 @@ h1 span { color: #6550e7; margin-left: .04em; }
 .art[data-kind="scholar"] { --art-background: #e7ebf7; --art-edge: #536caa; --art-face: #f0f4ff; --art-shadow: #a6b8e7; }
 .art[data-kind="scholar"] i::after { content: ""; display: block; width: 70%; height: 30px; margin: 17px auto; background: repeating-linear-gradient(#acbfee 0 2px, transparent 2px 9px); }
 
-.card-copy h3 { margin: 0; padding: 19px 22px 0; font-size: 19px; letter-spacing: -.035em; }
+.tile-title {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 50%;
+  height: calc(var(--art-height) / 2);
+  margin: 0;
+  padding: clamp(8px, 1.5vw, 18px);
+  text-align: right;
+  pointer-events: none;
+}
+.project-title, .tile-actions a {
+  font-weight: 900;
+  line-height: .94;
+  letter-spacing: -.075em;
+  text-transform: uppercase;
+}
+.project-title {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  max-height: calc(var(--art-height) / 2 - 2 * clamp(8px, 1.5vw, 18px));
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  font-size: clamp(22px, 3.2vw, 46px);
+  pointer-events: auto;
+}
+.project-title.long-title { font-size: clamp(16px, 2.35vw, 32px); }
 .project-title:hover { color: #4934c7; }
+.card:has(.art img) .tile-title { background: radial-gradient(ellipse at top right, #fffffff5, #ffffff00 78%); }
+
 .tile-description {
   margin: 0;
   min-height: 56px;
-  padding: 8px 22px 17px;
+  padding: 13px 22px;
   color: #575754;
   font-size: 14px;
   line-height: 1.5;
@@ -114,11 +144,9 @@ h1 span { color: #6550e7; margin-left: .04em; }
 .tile-actions a {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  padding: 10px 22px;
-  font-size: 14px;
-  font-weight: 650;
+  justify-content: center;
+  padding: 10px 16px;
+  font-size: clamp(22px, 3vw, 36px);
 }
 .tile-actions a + a { border-left: 1px solid #eeede9; }
 .tile-actions a:hover, .tile-actions a:focus-visible { background: #f1effd; color: #4934c7; }
@@ -208,7 +236,7 @@ body:has(.detail:not([hidden])) .site-header { position: relative; z-index: 1; }
   .shell { width: calc(100% - 40px); }
   .site-header { height: 60px; }
   .projects { grid-template-columns: 1fr; gap: 16px; }
-  .art { height: 176px; }
+  .card { --art-height: 176px; }
   .site-footer { margin-top: 48px; }
 }
 @media (prefers-reduced-motion: reduce) {

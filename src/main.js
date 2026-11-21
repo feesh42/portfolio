@@ -1,6 +1,6 @@
 import '@fontsource-variable/geist';
 import './style.css';
-import { discoverProjects, findProject, getProject, snapshot } from './projects.js';
+import { discoverProjects, findProject } from './projects.js';
 
 const grid = document.querySelector('#projects');
 const count = document.querySelector('#project-count');
@@ -49,6 +49,7 @@ function render(projects) {
     art.dataset.kind = project.art;
     title.href = detailPath;
     title.textContent = project.title;
+    if (project.title.length > 24) title.classList.add('long-title');
     info.href = detailPath;
     info.setAttribute('aria-label', `Info about ${project.title}`);
     tile.querySelector('.tile-description').textContent = project.description || '';
@@ -93,7 +94,12 @@ async function showProject(slug) {
   const title = detail.querySelector('h1');
   const summary = detail.querySelector('.detail-summary');
   const description = summary.querySelector('p');
-  const project = await findProject(slug);
+  let project;
+  try {
+    project = await findProject(slug);
+  } catch {
+    project = (await loadCatalog())?.find(item => item.slug.toLowerCase() === slug.toLowerCase());
+  }
   detail.removeAttribute('aria-busy');
   summary.hidden = false;
   if (!project) {
@@ -142,28 +148,25 @@ async function showProject(slug) {
   }
 }
 
-async function showCatalog() {
-  render(await Promise.all(snapshot.map(getProject)));
+async function loadCatalog() {
   try {
-    const projects = await discoverProjects();
-    // Avoid rebuilding cards while someone is reading, pointing at, or using one.
-    if (!grid.matches(':hover, :focus-within')) {
-      render(projects);
-    } else {
-      function updateWhenIdle() {
-        if (grid.matches(':hover, :focus-within')) return;
-        grid.removeEventListener('pointerleave', updateWhenIdle);
-        grid.removeEventListener('focusout', onFocusOut);
-        render(projects);
-      }
-      function onFocusOut() {
-        requestAnimationFrame(updateWhenIdle);
-      }
-      grid.addEventListener('pointerleave', updateWhenIdle);
-      grid.addEventListener('focusout', onFocusOut);
-    }
+    const response = await fetch('/projects.json', { signal: AbortSignal.timeout(3000) });
+    return response.ok ? await response.json() : null;
   } catch {
-    // Keep the bundled snapshot when GitHub is unavailable or rate-limited.
+    return null;
+  }
+}
+
+async function showCatalog() {
+  const catalog = await loadCatalog();
+  if (catalog) {
+    render(catalog);
+    return;
+  }
+  try {
+    render(await discoverProjects());
+  } catch {
+    grid.textContent = 'Projects are temporarily unavailable. Try refreshing the page.';
   }
 }
 

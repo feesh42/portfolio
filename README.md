@@ -8,9 +8,7 @@ Use Node.js 24. Run `npm ci`, then `npm run dev`. Use `npm run build` to produce
 
 ## Project listings
 
-The page reads the public GitHub repository list on load. It includes owner repositories and excludes forks, archived repositories, this portfolio, and repos tagged `portfolio-hidden`. A private repository becomes eligible once it is made public. If GitHub is unreachable or rate-limited, the page uses the bundled snapshot in `src/projects.js`.
-
-Use the repository’s GitHub **About** description and **Website** for the description and live demo. When there is no demo URL, the tile links to GitHub. Add the `portfolio` topic and a `portfolio.json` file at the root of the default branch to customize a card. All fields are optional.
+Each project opts in by placing **`<repository-name>.portfolio.json`** at the root of its default branch. Match the repository name and case exactly (for example, `my-demo.portfolio.json` for `my-demo`). The build discovers public repositories and generates the catalog from their manifests. The browser checks GitHub directly when the build catalog is unavailable. Trigger a portfolio rebuild after changing manifests or making a project public.
 
 ```json
 {
@@ -18,11 +16,12 @@ Use the repository’s GitHub **About** description and **Website** for the desc
   "description": "One sentence explaining what the project does.",
   "demo": "https://example.vercel.app",
   "thumbnail": "docs/preview.webp",
-  "gif": "docs/preview.gif"
+  "gif": "docs/preview.gif",
+  "art": "generic"
 }
 ```
 
-Media can use repository-relative paths or absolute HTTPS URLs. Pair a GIF with a still to show the still by default and play the GIF on mouse hover. The repository’s social preview remains useful for sharing on GitHub. The manifest defines what the portfolio displays.
+Title and description are required. Use `null` for a missing demo, thumbnail or GIF. Visit falls back to the GitHub profile if no demo is set. Media paths are relative to the manifest or absolute HTTPS URLs. A still image with a GIF swaps to the GIF on mouse hover. The optional `art` field selects fallback art (`generic`, `tabs`, `links`, `button`, or `scholar`). Manifests in private repositories stay private.
 
 ## Vercel
 
