@@ -101,13 +101,15 @@ h1 span { color: var(--accent); margin-left: .04em; }
   transition: transform .38s cubic-bezier(.2,.75,.3,1), box-shadow .12s ease-in-out;
 }
 .card.tilting { transition-duration: .13s, .12s; box-shadow: 0 7px 16px var(--shadow); }
+.tile-cover { display: grid; }
+.tile-cover > * { grid-area: 1 / 1; }
 .art {
   position: relative;
   isolation: isolate;
   overflow: hidden;
   display: grid;
   place-items: center;
-  height: var(--art-height);
+  min-height: var(--art-height);
   background-color: var(--art-background, var(--art-default));
   background-image: radial-gradient(var(--art-dot) 1px, transparent 1px);
   background-size: 16px 16px;
@@ -142,15 +144,12 @@ h1 span { color: var(--accent); margin-left: .04em; }
 .art[data-kind="scholar"] i::after { content: ""; display: block; width: 70%; height: 30px; margin: 17px auto; background: repeating-linear-gradient(light-dark(#acbfee, #90a9df) 0 2px, transparent 2px 9px); }
 
 .tile-title {
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 50%;
-  height: calc(var(--art-height) / 2);
+  z-index: 1;
+  align-self: start;
+  min-width: 0;
   margin: 0;
-  padding: clamp(8px, 1.5vw, 18px);
+  padding: clamp(8px, 1.5vw, 18px) clamp(8px, 1.5vw, 18px) 8px 52px;
   text-align: right;
-  pointer-events: none;
 }
 .project-title, .tile-actions a {
   font-weight: 900;
@@ -159,18 +158,12 @@ h1 span { color: var(--accent); margin-left: .04em; }
   text-transform: uppercase;
 }
 .project-title {
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;
-  max-height: calc(var(--art-height) / 2 - 2 * clamp(8px, 1.5vw, 18px));
-  overflow: hidden;
-  overflow-wrap: normal;
-  word-break: normal;
-  hyphens: none;
+  overflow-wrap: anywhere;
   text-wrap: balance;
   font-size: clamp(22px, 3.2vw, 46px);
-  pointer-events: auto;
 }
+.project-title::after { content: ""; position: absolute; inset: 0; }
+.project-title:focus-visible::after { outline: 2px solid var(--focus); outline-offset: -4px; border-radius: 15px; }
 .project-title.long-title { font-size: clamp(16px, 2.35vw, 32px); }
 .project-title:hover { color: var(--accent-text); }
 .card:has(.art img) .tile-title { background: radial-gradient(ellipse at top right, var(--title-scrim), var(--clear-scrim) 78%); }
@@ -185,6 +178,8 @@ h1 span { color: var(--accent); margin-left: .04em; }
 }
 .tile-description:empty { display: none; }
 .tile-actions {
+  position: relative;
+  z-index: 2;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   min-height: 49px;
@@ -218,6 +213,7 @@ h1 span { color: var(--accent); margin-left: .04em; }
 .action-primary[href]:hover { background: var(--primary-hover); border-color: var(--primary-hover); }
 .github-shortcut {
   position: absolute;
+  z-index: 2;
   top: 11px;
   left: 11px;
   display: grid;

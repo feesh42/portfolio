@@ -76,9 +76,7 @@ function render(projects) {
     const detailPath = `/projects/${encodeURIComponent(project.slug)}`;
 
     art.dataset.kind = project.art;
-    title.href = project.demo || project.source;
-    title.target = '_blank';
-    title.rel = 'noopener';
+    title.href = detailPath;
     title.textContent = project.title;
     if (project.title.length > 24) title.classList.add('long-title');
     info.href = detailPath;
@@ -186,6 +184,8 @@ async function showProject(slug, currentNavigation, focusHeading) {
   if (project.gif) {
     const link = document.createElement('a');
     link.href = project.gif;
+    link.target = '_blank';
+    link.rel = 'noopener';
     link.textContent = 'View animated preview ↗';
     link.className = 'action';
     if (matchMedia('(prefers-reduced-motion: reduce)').matches) {

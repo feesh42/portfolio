@@ -17,7 +17,7 @@
     <header class="site-header shell">
       <a class="identity" href="/" data-route><span class="mark" aria-hidden="true"></span>feesh42</a>
       <div class="header-end">
-        <a class="profile" href="https://github.com/feesh42">GitHub <span aria-hidden="true">↗</span></a>
+        <a class="profile" target="_blank" rel="noopener" href="https://github.com/feesh42">GitHub <span aria-hidden="true">↗</span></a>
         <button class="theme-toggle" type="button" aria-label="Dark mode" aria-pressed="false">
           <span class="theme-moon" aria-hidden="true">☾</span>
           <span class="theme-sun" aria-hidden="true">☼</span>
@@ -35,7 +35,7 @@
           <span id="project-count"></span>
         </div>
         <div id="projects" class="projects"></div>
-        <noscript><p>Browse the projects on <a href="https://github.com/feesh42?tab=repositories">GitHub</a>.</p></noscript>
+        <noscript><p>Browse the projects on <a target="_blank" rel="noopener" href="https://github.com/feesh42?tab=repositories">GitHub</a>.</p></noscript>
       </section>
     </main>
     <main id="project-detail" class="detail" hidden>
@@ -45,8 +45,8 @@
         <h1 id="detail-title" tabindex="-1"></h1>
         <p class="detail-loading" role="status" hidden>Loading…</p>
         <div class="detail-links" hidden>
-          <a class="detail-source" hidden><span></span></a>
-          <a class="action action-primary detail-visit" hidden>Visit ↗</a>
+          <a class="detail-source" target="_blank" rel="noopener" hidden><span></span></a>
+          <a class="action action-primary detail-visit" target="_blank" rel="noopener" hidden>Visit ↗</a>
         </div>
         <div class="detail-summary" hidden>
           <p></p>
@@ -56,19 +56,21 @@
     </main>
     <footer class="shell site-footer">
       <span>feesh42</span>
-      <a href="https://github.com/feesh42?tab=repositories">All repositories <span aria-hidden="true">↗</span></a>
+      <a target="_blank" rel="noopener" href="https://github.com/feesh42?tab=repositories">All repositories <span aria-hidden="true">↗</span></a>
     </footer>
     <template id="project-template">
       <article class="tile">
         <div class="card">
-          <div class="art" aria-hidden="true"><div class="motif"><i></i><i></i><i></i></div></div>
-          <a class="github-shortcut"></a>
-          <h3 class="tile-title"><a class="project-title"></a></h3>
+          <div class="tile-cover">
+            <div class="art" aria-hidden="true"><div class="motif"><i></i><i></i><i></i></div></div>
+            <h3 class="tile-title"><a class="project-title" data-route></a></h3>
+          </div>
+          <a class="github-shortcut" target="_blank" rel="noopener"></a>
           <div class="card-copy">
             <div class="tile-footer">
               <p class="tile-description"></p>
               <div class="tile-actions">
-                <a class="visit">Visit</a>
+                <a class="visit" target="_blank" rel="noopener">Visit</a>
                 <a class="info" data-route>Info</a>
               </div>
             </div>
