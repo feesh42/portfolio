@@ -51,14 +51,9 @@ function render(projects) {
     title.textContent = project.title;
     info.href = detailPath;
     info.setAttribute('aria-label', `Info about ${project.title}`);
-    if (project.demo) {
-      visit.href = project.demo;
-      visit.setAttribute('aria-label', `Visit ${project.title}`);
-    } else {
-      visit.setAttribute('aria-disabled', 'true');
-      visit.setAttribute('aria-label', 'Visit unavailable: no live demo listed');
-      visit.title = 'No live demo listed';
-    }
+    tile.querySelector('.tile-description').textContent = project.description || '';
+    visit.href = project.demo || 'https://github.com/feesh42';
+    visit.setAttribute('aria-label', project.demo ? `Visit ${project.title}` : 'Visit feesh42 on GitHub');
     source.href = project.source;
     source.setAttribute('aria-label', `${project.title} on GitHub`);
     source.append(githubIcon());
