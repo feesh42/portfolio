@@ -2,6 +2,30 @@ import '@fontsource-variable/geist';
 import './style.css';
 import { discoverProjects, findProject } from './projects.js';
 
+const systemTheme = matchMedia('(prefers-color-scheme: dark)');
+const root = document.documentElement;
+const themeToggle = document.querySelector('.theme-toggle');
+const themeColor = document.querySelector('meta[name="theme-color"]');
+
+function syncTheme() {
+  const dark = root.dataset.theme ? root.dataset.theme === 'dark' : systemTheme.matches;
+  themeToggle.setAttribute('aria-pressed', String(dark));
+  themeColor.content = dark ? '#101014' : '#f9f9f7';
+}
+
+themeToggle.addEventListener('click', () => {
+  const theme = themeToggle.getAttribute('aria-pressed') === 'true' ? 'light' : 'dark';
+  root.dataset.theme = theme;
+  try {
+    localStorage.setItem('portfolio-theme', theme);
+  } catch {
+    // Keep the selected theme for this page when storage is unavailable.
+  }
+  syncTheme();
+});
+systemTheme.addEventListener('change', syncTheme);
+syncTheme();
+
 const grid = document.querySelector('#projects');
 const count = document.querySelector('#project-count');
 const template = document.querySelector('#project-template');

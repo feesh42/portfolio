@@ -5,11 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Public projects and demos by feesh42.">
     <meta name="theme-color" content="#f9f9f7">
+    <script>
+      try {
+        const theme = localStorage.getItem('portfolio-theme');
+        if (theme === 'dark' || theme === 'light') document.documentElement.dataset.theme = theme;
+      } catch {}
+    </script>
     <title>Demos · feesh42</title>
   </head>
   <body>
     <header class="site-header shell">
-      <a class="identity" href="/"><span class="mark" aria-hidden="true"></span>feesh42</a>
+      <div class="header-start">
+        <button class="theme-toggle" type="button" aria-label="Dark mode" aria-pressed="false">
+          <span class="theme-moon" aria-hidden="true">☾</span>
+          <span class="theme-sun" aria-hidden="true">☼</span>
+        </button>
+        <a class="identity" href="/"><span class="mark" aria-hidden="true"></span>feesh42</a>
+      </div>
       <a class="profile" href="https://github.com/feesh42">GitHub <span aria-hidden="true">↗</span></a>
     </header>
     <main id="catalog" class="shell">
