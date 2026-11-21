@@ -82,8 +82,8 @@ function render(projects) {
     info.href = detailPath;
     info.setAttribute('aria-label', `Info about ${project.title}`);
     tile.querySelector('.tile-description').textContent = project.description || '';
-    visit.href = project.demo || 'https://github.com/feesh42';
-    visit.setAttribute('aria-label', project.demo ? `Visit ${project.title}` : 'Visit feesh42 on GitHub');
+    visit.href = project.deployment || 'https://github.com/feesh42';
+    visit.setAttribute('aria-label', project.deployment ? `Visit ${project.title}` : 'Visit feesh42 on GitHub');
     source.href = project.source;
     source.setAttribute('aria-label', `${project.title} on GitHub`);
     source.append(githubIcon());
@@ -169,9 +169,9 @@ async function showProject(slug, currentNavigation, focusHeading) {
   source.append(githubIcon());
   source.hidden = false;
   const visit = detail.querySelector('.detail-visit');
-  visit.hidden = !project.demo;
-  if (project.demo) {
-    visit.href = project.demo;
+  visit.hidden = !project.deployment;
+  if (project.deployment) {
+    visit.href = project.deployment;
   }
   if (project.thumbnail) {
     const background = new Image();
@@ -241,7 +241,7 @@ function renderRoute(focusHeading = false) {
   if (slug) {
     void showProject(slug, currentNavigation, focusHeading);
   } else {
-    document.title = 'Demos · feesh42';
+    document.title = 'Projects · feesh42';
     if (focusHeading) catalogView.querySelector('h1').focus({ preventScroll: true });
     catalogRequest ??= showCatalog();
   }

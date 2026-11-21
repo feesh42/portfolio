@@ -1,7 +1,7 @@
 {
-  "title": "Demos",
-  "description": "A portfolio of public projects and demos by feesh42.",
-  "demo": null,
+  "title": "Portfolio Generator",
+  "description": "A portfolio generated from public projects by feesh42.",
+  "deployment": null,
   "thumbnail": null,
   "gif": null,
   "art": "generic"

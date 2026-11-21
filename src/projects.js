@@ -30,7 +30,7 @@ export async function getProject(repo) {
     title: metadata.title.trim(),
     description: metadata.description.trim(),
     source: `https://github.com/${owner}/${encodeURIComponent(slug)}`,
-    demo: httpsUrl(metadata.demo),
+    deployment: httpsUrl(metadata.deployment) || httpsUrl(metadata.demo),
     thumbnail: httpsUrl(metadata.thumbnail, base),
     gif: httpsUrl(metadata.gif, base),
     art: typeof metadata.art === 'string' ? metadata.art : 'generic',
