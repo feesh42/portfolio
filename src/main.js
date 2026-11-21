@@ -1,6 +1,6 @@
 import '@fontsource-variable/geist';
 import './style.css';
-import { discoverProjects, getProject, snapshot } from './projects.js';
+import { discoverProjects, findProject, getProject, snapshot } from './projects.js';
 
 const grid = document.querySelector('#projects');
 const count = document.querySelector('#project-count');
@@ -40,17 +40,28 @@ function render(projects) {
     const tile = template.content.firstElementChild.cloneNode(true);
     const card = tile.querySelector('.card');
     const art = tile.querySelector('.art');
-    const link = tile.querySelector('.project-link');
-    const description = tile.querySelector('.description');
-    const source = tile.querySelector('.source-link');
+    const title = tile.querySelector('.project-title');
+    const visit = tile.querySelector('.visit');
+    const info = tile.querySelector('.info');
+    const source = tile.querySelector('.github-shortcut');
+    const detailPath = `/projects/${encodeURIComponent(project.slug)}`;
 
     art.dataset.kind = project.art;
-    link.href = project.demo || project.source;
-    link.firstElementChild.textContent = project.title;
-    description.textContent = project.description || '';
-    description.hidden = !project.description;
-    source.hidden = !project.demo;
+    title.href = detailPath;
+    title.textContent = project.title;
+    info.href = detailPath;
+    info.setAttribute('aria-label', `Info about ${project.title}`);
+    if (project.demo) {
+      visit.href = project.demo;
+      visit.setAttribute('aria-label', `Visit ${project.title}`);
+    } else {
+      visit.setAttribute('aria-disabled', 'true');
+      visit.setAttribute('aria-label', 'Visit unavailable: no live demo listed');
+      visit.title = 'No live demo listed';
+    }
     source.href = project.source;
+    source.setAttribute('aria-label', `${project.title} on GitHub`);
+    source.append(githubIcon());
 
     let image;
     const media = project.thumbnail || (canTilt.matches ? project.gif : '');
@@ -76,25 +87,94 @@ function render(projects) {
   }
 }
 
-render(await Promise.all(snapshot.map(getProject)));
-try {
-  const projects = await discoverProjects();
-  // Avoid rebuilding cards while someone is reading, pointing at, or using one.
-  if (!grid.matches(':hover, :focus-within')) {
-    render(projects);
-  } else {
-    function updateWhenIdle() {
-      if (grid.matches(':hover, :focus-within')) return;
-      grid.removeEventListener('pointerleave', updateWhenIdle);
-      grid.removeEventListener('focusout', onFocusOut);
-      render(projects);
-    }
-    function onFocusOut() {
-      requestAnimationFrame(updateWhenIdle);
-    }
-    grid.addEventListener('pointerleave', updateWhenIdle);
-    grid.addEventListener('focusout', onFocusOut);
+function githubIcon() {
+  return document.querySelector('#github-icon').content.cloneNode(true);
+}
+
+async function showProject(slug) {
+  document.querySelector('#catalog').hidden = true;
+  const detail = document.querySelector('#project-detail');
+  detail.hidden = false;
+  const title = detail.querySelector('h1');
+  const summary = detail.querySelector('.detail-summary');
+  const description = summary.querySelector('p');
+  const project = await findProject(slug);
+  detail.removeAttribute('aria-busy');
+  summary.hidden = false;
+  if (!project) {
+    title.textContent = 'Project unavailable';
+    description.textContent = 'This project could not be found in the public portfolio.';
+    document.title = 'Project unavailable · feesh42';
+    return;
   }
-} catch {
-  // Keep the bundled snapshot when GitHub is unavailable or rate-limited.
+
+  title.textContent = project.title;
+  document.title = `${project.title} · feesh42`;
+  const source = detail.querySelector('.detail-source');
+  source.href = project.source;
+  source.firstElementChild.textContent = project.source;
+  source.append(githubIcon());
+  source.hidden = false;
+  if (project.demo) {
+    const visit = detail.querySelector('.detail-visit');
+    visit.href = project.demo;
+    visit.hidden = false;
+  }
+  if (project.thumbnail) {
+    const background = new Image();
+    background.alt = '';
+    background.src = project.thumbnail;
+    detail.querySelector('.detail-backdrop').append(background);
+  }
+  description.textContent = project.description || '';
+  description.hidden = !project.description;
+  if (project.gif) {
+    const preview = detail.querySelector('.detail-preview');
+    const link = document.createElement('a');
+    link.href = project.gif;
+    link.textContent = 'View animated preview ↗';
+    link.className = 'action';
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      preview.append(link);
+    } else {
+      const image = new Image();
+      image.alt = `${project.title} in action`;
+      image.loading = 'lazy';
+      image.addEventListener('error', () => image.replaceWith(link), { once: true });
+      image.src = project.gif;
+      preview.append(image);
+    }
+  }
+}
+
+async function showCatalog() {
+  render(await Promise.all(snapshot.map(getProject)));
+  try {
+    const projects = await discoverProjects();
+    // Avoid rebuilding cards while someone is reading, pointing at, or using one.
+    if (!grid.matches(':hover, :focus-within')) {
+      render(projects);
+    } else {
+      function updateWhenIdle() {
+        if (grid.matches(':hover, :focus-within')) return;
+        grid.removeEventListener('pointerleave', updateWhenIdle);
+        grid.removeEventListener('focusout', onFocusOut);
+        render(projects);
+      }
+      function onFocusOut() {
+        requestAnimationFrame(updateWhenIdle);
+      }
+      grid.addEventListener('pointerleave', updateWhenIdle);
+      grid.addEventListener('focusout', onFocusOut);
+    }
+  } catch {
+    // Keep the bundled snapshot when GitHub is unavailable or rate-limited.
+  }
+}
+
+const route = location.pathname.match(/^\/projects\/([a-z0-9_.-]+)\/?$/i);
+if (route) {
+  await showProject(route[1]);
+} else {
+  await showCatalog();
 }

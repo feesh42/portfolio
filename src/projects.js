@@ -55,6 +55,7 @@ export async function getProject(repo) {
     }
   }
   return {
+    slug: repo.name,
     title: label(metadata.title, title),
     description: label(metadata.description, label(repo.description, existing.find(item => item.name === repo.name)?.description)),
     source: `https://github.com/${owner}/${encodeURIComponent(repo.name)}`,
@@ -78,11 +79,27 @@ export async function discoverProjects() {
     repos.push(...batch);
     if (batch.length < 100) break;
   }
-  const eligible = repos.filter(repo =>
-    repo.name.toLowerCase() !== 'portfolio' && !repo.private && !repo.fork && !repo.archived &&
-    !repo.topics?.includes('portfolio-hidden'),
-  );
   const initialOrder = existing.map(repo => repo.name);
   const position = name => initialOrder.includes(name) ? initialOrder.indexOf(name) : initialOrder.length;
-  return Promise.all(eligible.sort((a, b) => position(a.name) - position(b.name)).map(getProject));
+  return Promise.all(repos.filter(isEligible).sort((a, b) => position(a.name) - position(b.name)).map(getProject));
+}
+
+function isEligible(repo) {
+  return typeof repo.name === 'string' && repo.name.toLowerCase() !== 'portfolio' &&
+    !repo.private && !repo.fork && !repo.archived && !repo.topics?.includes('portfolio-hidden');
+}
+
+export async function findProject(slug) {
+  try {
+    const response = await fetch(`https://api.github.com/repos/${owner}/${encodeURIComponent(slug)}`, {
+      signal: AbortSignal.timeout(5000),
+    });
+    if (response.status === 404) return null;
+    if (!response.ok) throw new Error(`GitHub returned ${response.status}`);
+    const repo = await response.json();
+    return isEligible(repo) ? getProject(repo) : null;
+  } catch {
+    const repo = snapshot.find(item => item.name.toLowerCase() === slug.toLowerCase());
+    return repo ? getProject(repo) : null;
+  }
 }
