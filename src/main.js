@@ -14,8 +14,8 @@ function addTilt(tile, card, image, project) {
     const x = Math.max(-1, Math.min(1, 2 * (event.clientX - bounds.left) / bounds.width - 1));
     const y = Math.max(-1, Math.min(1, 2 * (event.clientY - bounds.top) / bounds.height - 1));
     card.classList.add('tilting');
-    card.style.setProperty('--pitch', `${-y * 10}deg`);
-    card.style.setProperty('--yaw', `${x * 12}deg`);
+    card.style.setProperty('--pitch', `${-y * 2.5}deg`);
+    card.style.setProperty('--yaw', `${x * 3}deg`);
   });
 
   function resetTilt() {
