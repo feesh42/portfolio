@@ -15,18 +15,18 @@
   </head>
   <body>
     <header class="site-header shell">
-      <div class="header-start">
+      <a class="identity" href="/" data-route><span class="mark" aria-hidden="true"></span>feesh42</a>
+      <div class="header-end">
+        <a class="profile" href="https://github.com/feesh42">GitHub <span aria-hidden="true">↗</span></a>
         <button class="theme-toggle" type="button" aria-label="Dark mode" aria-pressed="false">
           <span class="theme-moon" aria-hidden="true">☾</span>
           <span class="theme-sun" aria-hidden="true">☼</span>
         </button>
-        <a class="identity" href="/"><span class="mark" aria-hidden="true"></span>feesh42</a>
       </div>
-      <a class="profile" href="https://github.com/feesh42">GitHub <span aria-hidden="true">↗</span></a>
     </header>
     <main id="catalog" class="shell">
       <div class="hero">
-        <h1>DEMOS<span>.</span></h1>
+        <h1 tabindex="-1">DEMOS<span>.</span></h1>
         <p>Public projects by feesh42.</p>
       </div>
       <section class="project-section" aria-labelledby="projects-heading">
@@ -38,12 +38,13 @@
         <noscript><p>Browse the projects on <a href="https://github.com/feesh42?tab=repositories">GitHub</a>.</p></noscript>
       </section>
     </main>
-    <main id="project-detail" class="detail" hidden aria-busy="true">
+    <main id="project-detail" class="detail" hidden>
       <div class="detail-backdrop" aria-hidden="true"></div>
       <div class="shell detail-content">
-        <a class="detail-back" href="/">← All demos</a>
-        <h1 id="detail-title">Loading project…</h1>
-        <div class="detail-links">
+        <a class="detail-back" href="/" data-route>← Back to project overview</a>
+        <h1 id="detail-title" tabindex="-1"></h1>
+        <p class="detail-loading" role="status" hidden>Loading…</p>
+        <div class="detail-links" hidden>
           <a class="detail-source" hidden><span></span></a>
           <a class="action action-primary detail-visit" hidden>Visit ↗</a>
         </div>
@@ -68,7 +69,7 @@
               <p class="tile-description"></p>
               <div class="tile-actions">
                 <a class="visit">Visit</a>
-                <a class="info">Info</a>
+                <a class="info" data-route>Info</a>
               </div>
             </div>
           </div>

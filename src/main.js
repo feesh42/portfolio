@@ -26,6 +26,11 @@ themeToggle.addEventListener('click', () => {
 systemTheme.addEventListener('change', syncTheme);
 syncTheme();
 
+const catalogView = document.querySelector('#catalog');
+const detail = document.querySelector('#project-detail');
+const projectCache = new Map();
+let catalogRequest;
+let navigation = 0;
 const grid = document.querySelector('#projects');
 const count = document.querySelector('#project-count');
 const template = document.querySelector('#project-template');
@@ -71,7 +76,9 @@ function render(projects) {
     const detailPath = `/projects/${encodeURIComponent(project.slug)}`;
 
     art.dataset.kind = project.art;
-    title.href = detailPath;
+    title.href = project.demo || project.source;
+    title.target = '_blank';
+    title.rel = 'noopener';
     title.textContent = project.title;
     if (project.title.length > 24) title.classList.add('long-title');
     info.href = detailPath;
@@ -111,50 +118,72 @@ function githubIcon() {
   return document.querySelector('#github-icon').content.cloneNode(true);
 }
 
-async function showProject(slug) {
-  document.querySelector('#catalog').hidden = true;
-  const detail = document.querySelector('#project-detail');
-  detail.hidden = false;
+async function showProject(slug, currentNavigation, focusHeading) {
   const title = detail.querySelector('h1');
   const summary = detail.querySelector('.detail-summary');
   const description = summary.querySelector('p');
-  let project;
-  try {
-    project = await findProject(slug);
-  } catch {
-    project = (await loadCatalog())?.find(item => item.slug.toLowerCase() === slug.toLowerCase());
+  const links = detail.querySelector('.detail-links');
+  const loading = detail.querySelector('.detail-loading');
+  const backdrop = detail.querySelector('.detail-backdrop');
+  const preview = detail.querySelector('.detail-preview');
+  const key = slug.toLowerCase();
+  let project = projectCache.get(key);
+
+  title.textContent = project?.title ?? slug.replace(/[-_]+/g, ' ');
+  document.title = `${title.textContent} · feesh42`;
+  if (focusHeading) title.focus({ preventScroll: true });
+  links.hidden = true;
+  summary.hidden = true;
+  loading.hidden = Boolean(project);
+  backdrop.replaceChildren();
+  preview.replaceChildren();
+
+  if (!project) {
+    const catalog = await loadCatalog();
+    if (currentNavigation !== navigation) return;
+    project = catalog?.find(item => item.slug.toLowerCase() === key);
+    if (!project) {
+      try {
+        project = await findProject(slug);
+      } catch {
+        project = null;
+      }
+      if (currentNavigation !== navigation) return;
+    }
   }
-  detail.removeAttribute('aria-busy');
+
+  loading.hidden = true;
   summary.hidden = false;
   if (!project) {
-    title.textContent = 'Project unavailable';
+    description.hidden = false;
     description.textContent = 'This project could not be found in the public portfolio.';
-    document.title = 'Project unavailable · feesh42';
     return;
   }
 
+  projectCache.set(key, project);
   title.textContent = project.title;
   document.title = `${project.title} · feesh42`;
+  links.hidden = false;
   const source = detail.querySelector('.detail-source');
   source.href = project.source;
   source.firstElementChild.textContent = project.source;
+  source.querySelector('svg')?.remove();
   source.append(githubIcon());
   source.hidden = false;
+  const visit = detail.querySelector('.detail-visit');
+  visit.hidden = !project.demo;
   if (project.demo) {
-    const visit = detail.querySelector('.detail-visit');
     visit.href = project.demo;
-    visit.hidden = false;
   }
   if (project.thumbnail) {
     const background = new Image();
     background.alt = '';
     background.src = project.thumbnail;
-    detail.querySelector('.detail-backdrop').append(background);
+    backdrop.append(background);
   }
   description.textContent = project.description || '';
   description.hidden = !project.description;
   if (project.gif) {
-    const preview = detail.querySelector('.detail-preview');
     const link = document.createElement('a');
     link.href = project.gif;
     link.textContent = 'View animated preview ↗';
@@ -172,31 +201,63 @@ async function showProject(slug) {
   }
 }
 
-async function loadCatalog() {
+let buildCatalog;
+
+function loadCatalog() {
+  buildCatalog ??= fetchCatalog();
+  return buildCatalog;
+}
+
+async function fetchCatalog() {
   try {
     const response = await fetch('/projects.json', { signal: AbortSignal.timeout(3000) });
-    return response.ok ? await response.json() : null;
+    if (!response.ok) return null;
+    const projects = await response.json();
+    return Array.isArray(projects) ? projects : null;
   } catch {
     return null;
   }
 }
 
 async function showCatalog() {
-  const catalog = await loadCatalog();
-  if (catalog) {
-    render(catalog);
-    return;
-  }
   try {
-    render(await discoverProjects());
+    const projects = (await loadCatalog()) ?? await discoverProjects();
+    for (const project of projects) projectCache.set(project.slug.toLowerCase(), project);
+    render(projects);
   } catch {
     grid.textContent = 'Projects are temporarily unavailable. Try refreshing the page.';
   }
 }
 
-const route = location.pathname.match(/^\/projects\/([a-z0-9_.-]+)\/?$/i);
-if (route) {
-  await showProject(route[1]);
-} else {
-  await showCatalog();
+function projectRoute(path) {
+  return path.match(/^\/projects\/([a-z0-9_.-]+)\/?$/i)?.[1];
 }
+
+function renderRoute(focusHeading = false) {
+  const currentNavigation = ++navigation;
+  const slug = projectRoute(location.pathname);
+  catalogView.hidden = Boolean(slug);
+  detail.hidden = !slug;
+  if (slug) {
+    void showProject(slug, currentNavigation, focusHeading);
+  } else {
+    document.title = 'Demos · feesh42';
+    if (focusHeading) catalogView.querySelector('h1').focus({ preventScroll: true });
+    catalogRequest ??= showCatalog();
+  }
+}
+
+document.addEventListener('click', event => {
+  const link = event.target.closest('a[data-route]');
+  if (!link || event.defaultPrevented || event.button !== 0 || event.metaKey ||
+      event.ctrlKey || event.shiftKey || event.altKey || link.target || link.hasAttribute('download')) return;
+  const url = new URL(link.href);
+  if (url.origin !== location.origin || (url.pathname !== '/' && !projectRoute(url.pathname))) return;
+  event.preventDefault();
+  if (url.href === location.href) return;
+  history.pushState(null, '', url);
+  renderRoute(true);
+  window.scrollTo(0, 0);
+});
+window.addEventListener('popstate', () => renderRoute(true));
+renderRoute();
